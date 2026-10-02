@@ -1,0 +1,29 @@
+# -----------------------------
+# Secrets and Environment
+# -----------------------------
+.env
+*.key
+*.pem
+
+# -----------------------------
+# Python
+# -----------------------------
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.pytest_cache/
+
+# -----------------------------
+# Terraform (Infrastructure)
+# -----------------------------
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/*.tfvars
+
+# -----------------------------
+# OS Files (macOS)
+# -----------------------------
+.DS_Store

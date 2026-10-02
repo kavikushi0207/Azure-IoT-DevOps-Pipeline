@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq-broker
+    ports:
+      - "15672:15672" # Management UI
+      - "5672:5672"   # AMQP
+      - "1883:1883"   # MQTT
+    # Force the container to enable the MQTT plugin on boot
+    command: /bin/sh -c "rabbitmq-plugins enable rabbitmq_mqtt && rabbitmq-server"
+
+  sensor:
+    build: 
+      context: ./edge
+      dockerfile: Dockerfile
+    container_name: edge-sensor
+    # Override the default command to run the producer
+    command: ["python", "sensor_producer.py"]
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+    environment:
+      - PYTHONUNBUFFERED=1
+
+  gateway:
+    build: 
+      context: ./edge
+      dockerfile: Dockerfile
+    container_name: edge-gateway
+    # Override the default command to run the consumer
+    command: ["python", "edge_gateway.py"]
+    depends_on:
+      - rabbitmq
+    restart: on-failure
+    environment:
+      - PYTHONUNBUFFERED=1
+      - IOTHUB_DEVICE_CONNECTION_STRING=${IOTHUB_DEVICE_CONNECTION_STRING}
