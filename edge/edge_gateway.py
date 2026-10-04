@@ -10,7 +10,10 @@ if not CONNECTION_STRING:
     raise ValueError("Missing IOTHUB_DEVICE_CONNECTION_STRING environment variable!")
 
 print("Connecting to Azure IoT Hub...")
-azure_client = IoTHubDeviceClient.create_from_connection_string(CONNECTION_STRING)
+azure_client = IoTHubDeviceClient.create_from_connection_string(
+    CONNECTION_STRING.strip('"\''),  # Defensive strip against residual quotes
+    websockets=True
+)
 azure_client.connect()
 print("Azure connection established.")
 

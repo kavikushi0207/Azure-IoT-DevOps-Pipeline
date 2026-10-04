@@ -3,9 +3,11 @@ import json
 import random
 import paho.mqtt.client as mqtt
 
+# Import our new encryption module
+from encryption import HE_CONTEXT, encrypt_float
+
 client = mqtt.Client(client_id="motor_sensor_01")
 
-# 1. Connect to RabbitMQ with retry logic
 while True:
     try:
         client.connect("rabbitmq", 1883)
@@ -15,21 +17,24 @@ while True:
         print("RabbitMQ is not ready yet. Retrying in 3 seconds...")
         time.sleep(3)
 
-# 2. Start the network daemon in the background
 client.loop_start()
 
-# 3. Generate and publish telemetry every 5 seconds
-print("Starting telemetry transmission...")
+print("Starting homomorphically encrypted telemetry transmission...")
 while True:
+    raw_temp = round(random.uniform(20.0, 30.0), 2)
+    
+    # Encrypt the temperature before it goes into the payload
+    encrypted_temp_b64 = encrypt_float(HE_CONTEXT, raw_temp)
+    
     payload = {
         "sensor_id": "motor_sensor_01",
-        "temperature": round(random.uniform(20.0, 30.0), 2),
+        "temperature_encrypted": encrypted_temp_b64,
         "timestamp": int(time.time())
     }
     
-    # Publish to the MQTT topic
     client.publish("factory/telemetry", json.dumps(payload))
-    print(f"[Sensor] Published: {payload}")
     
-    # Wait 5 seconds before sending the next one
+    # We print the raw temp locally just so you can verify what is happening
+    print(f"[Sensor] Raw: {raw_temp}°C -> Encrypted Payload Sent.")
+    
     time.sleep(5)

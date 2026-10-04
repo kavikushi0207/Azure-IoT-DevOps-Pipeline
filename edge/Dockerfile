@@ -1,4 +1,4 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 WORKDIR /app
 
@@ -17,5 +17,4 @@ RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy Python scripts into the container
-COPY sensor_producer.py .
-COPY edge_gateway.py .
+COPY . /app/
