@@ -20,5 +20,10 @@ def encrypt_float(context, value):
     serialized_bytes = encrypted_vector.serialize()
     return base64.b64encode(serialized_bytes).decode('utf-8')
 
+def encrypt_vector(context, values: list | tuple):
+    """Encrypts an entire tuple/list of floats into a SINGLE ciphertext."""
+    encrypted_vector = ts.ckks_vector(context, list(values))
+    serialized_bytes = encrypted_vector.serialize()
+    return base64.b64encode(serialized_bytes).decode('utf-8')
 # We generate the context once when the module loads
 HE_CONTEXT = create_context()

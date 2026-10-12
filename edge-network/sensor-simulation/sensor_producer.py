@@ -4,8 +4,8 @@ import random
 import paho.mqtt.client as mqtt
 
 # Import our new encryption module
-from encryption import HE_CONTEXT, encrypt_float
-
+from encryption import HE_CONTEXT, encrypt_float, encrypt_vector
+# Initialize the MQTT client for the sensor
 client = mqtt.Client(client_id="motor_sensor_01")
 
 while True:
@@ -25,12 +25,21 @@ while True:
     
     # Encrypt the temperature before it goes into the payload
     encrypted_temp_b64 = encrypt_float(HE_CONTEXT, raw_temp)
-    
+    # Multiple metrics generated at the same timestamp
+    temp = 24.8
+    vib_x = 0.15
+    vib_y = 0.42
+
+# Encrypt the tuple together into ONE ciphertext
+    metrics_tuple = (temp, vib_x, vib_y)
+    encrypted_blob = encrypt_vector(HE_CONTEXT, metrics_tuple)
+    # Create the payload with the encrypted temperature
     payload = {
         "sensor_id": "motor_sensor_01",
-        "temperature_encrypted": encrypted_temp_b64,
+        "metrics_order": ["temperature", "vibration_x", "vibration_y"],
+        "metrics_encrypted": encrypted_blob,
         "timestamp": int(time.time())
-    }
+}
     
     client.publish("factory/telemetry", json.dumps(payload))
     
